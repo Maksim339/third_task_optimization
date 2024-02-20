@@ -1,8 +1,6 @@
-
-% Пример использования функции
-q1 = 0; % Угол звена 1
-q2 = 0; % Угол звена 2
-q3 = 0; % Угол звена 3
+q1 = 0.226750711507744; % Угол звена 1
+q2 = 2.35115717632322; % Угол звена 2
+q3 = 2.20054373412980; % Угол звена 3
 [d, R] = manipulator_model(q1, q2, q3);
 
 % Вывод результатов
@@ -10,6 +8,37 @@ disp('Положение схвата (d):');
 disp(d);
 disp('Ориентация схвата (R):');
 disp(R);
+disp([R d; 0 0 0 1])
+
+
+% Загрузка данных из файла calib.mat
+load('calib.mat');
+
+% calib.Q и calib.T теперь доступны для использования
+Q = calib.Q;
+T_actual = calib.T;
+
+% Цикл по каждому набору углов из Q
+for i = 1:size(Q, 1)
+    q1 = Q(i, 1); % Угол звена 1
+    q2 = Q(i, 2); % Угол звена 2
+    q3 = Q(i, 3); % Угол звена 3
+
+    % Вычисление матрицы преобразования с использованием модели манипулятора
+    [d, R] = manipulator_model(q1, q2, q3);
+    T_calculated = [R d; 0 0 0 1];
+
+    % Вывод результатов
+    disp(['Матрица преобразования для набора углов ', num2str(i), ':']);
+    disp(T_calculated);
+
+    disp(['Фактическая матрица преобразования для набора углов ', num2str(i), ':']);
+    disp(T_actual(:, :, i));
+
+    % Сравнение с фактической матрицей из T
+    diff = norm(T_calculated - T_actual(:, :, i), 'fro');
+    disp(['Разница с фактической матрицей: ', num2str(diff)]);
+end
 
 
 
@@ -42,7 +71,6 @@ function Tx = transx(a)
           0 0 0 1];
 end
 
-% Функция для построения модели манипулятора и вычисления прямой кинематики
 function [d, R] = manipulator_model(q1, q2, q3)
     % DH параметры манипулятора
     % Звено 1
@@ -73,6 +101,7 @@ function [d, R] = manipulator_model(q1, q2, q3)
     R = T(1:3, 1:3);
 end
 
+
 % Функция для создания матрицы преобразования Денавита-Хартенберга
 function T = dh_transform(theta, d, a, alpha)
     T = [cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha), a*cos(theta);
@@ -80,4 +109,6 @@ function T = dh_transform(theta, d, a, alpha)
          0, sin(alpha), cos(alpha), d;
          0, 0, 0, 1];
 end
+
+
 
