@@ -11,7 +11,7 @@ lb = [290, -0.01, pi/2-0.01, -10, 390, -0.01, -10, 490, -0.01, -10, -0.01, -0.01
 ub = [310, 0.01, pi/2+0.01, 10, 410, 0.01, 10, 510, 0.01, 10, 0.01, 0.01];
 
 % Опции для fmincon
-options = optimoptions('fmincon','Display','iter','Algorithm','sqp');
+options = optimset('TolX',1e-16,'MaxIter',2e3,'MaxFunEvals',2000);
 
 % Выполнение оптимизации
 [optimized_params, fval] = fmincon(@(params) objective_function(params, Q, T_actual), initial_params, [], [], [], [], lb, ub, [], options);
